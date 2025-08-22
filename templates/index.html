@@ -17,7 +17,6 @@
         img { max-width: 100%; height: auto; border-radius: 8px; }
         .training-section { background-color: #ffffff; padding: 30px; border-radius: 12px; margin-bottom: 40px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); text-align: center; }
         input[type="number"] { padding: 10px; width: 200px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; margin-right: 10px; }
-        /* Nuevos estilos para el botón de limpiar */
         .button-group { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
         .button-group button { background-color: #27ae60; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
         .button-group button:hover { background-color: #229954; }
@@ -46,9 +45,7 @@
                     <button type="submit" formaction="{{ url_for('index') }}" formmethod="GET" class="clear-button">Limpiar</button>
                 </div>
             </form>
-             {% if results %}
-                <p style="margin-top: 15px;">(Total de correos disponibles: {{ results.total_data }})</p>
-             {% endif %}
+             <p style="margin-top: 15px;">(Total de correos disponibles: {{ total_data or '...' }})</p>
         </div>
         
         {% if error %}
