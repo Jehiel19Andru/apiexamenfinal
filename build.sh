@@ -3,8 +3,8 @@ set -e
 
 # --- Pega aquí las URLs de tus archivos .joblib (modelo y vectorizador) ---
 # ¡IMPORTANTE! Estas URLs deben ser de los archivos que subiste a GitHub.
-MODEL_URL="https://github.com/Jehiel19Andru/apiexamenfinal/releases/download/v4.0-model/spam_classifier_model.joblib"
-VECTORIZER_URL="https://github.com/Jehiel19Andru/apiexamenfinal/releases/download/v4.0-model/tfidf_vectorizer.joblib"
+MODEL_URL="https://github.com/Jehiel19Andru/apiexamenfinal/releases/download/v3.1-dosdatasets/spam_classifier_model.joblib"
+VECTORIZER_URL="https://github.com/Jehiel19Andru/apiexamenfinal/releases/download/v3.1-dosdatasets/tfidf_vectorizer.joblib"
 
 # --- Descargar el modelo y el vectorizador pre-entrenados ---
 echo "Verificando si los modelos pre-entrenados existen..."
