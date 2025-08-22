@@ -33,7 +33,7 @@
 
         <div class="training-section">
             <h2>Control de Entrenamiento</h2>
-            <form action="{{ url_for('index') }}" method="POST">
+            <form action="{{ url_for('home') }}" method="POST">
                 <label for="sample_size">Número de correos para entrenar:</label>
                 <input type="number" name="sample_size" id="sample_size" 
                        placeholder="Ej: 10000" 
@@ -42,7 +42,7 @@
                 
                 <div class="button-group">
                     <button type="submit">Entrenar y Evaluar</button>
-                    <button type="submit" formaction="{{ url_for('index') }}" formmethod="GET" class="clear-button">Limpiar</button>
+                    <button type="submit" formaction="{{ url_for('home') }}" formmethod="GET" class="clear-button">Limpiar</button>
                 </div>
             </form>
              <p style="margin-top: 15px;">(Total de correos disponibles: {{ total_data or '...' }})</p>
