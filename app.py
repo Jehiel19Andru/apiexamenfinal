@@ -1,48 +1,60 @@
 # app.py
-from flask import Flask, render_template, request
-from model_logic import train_and_evaluate, get_total_data
+import os
+import pickle
+from flask import Flask, request, jsonify, render_template
 
+# Configuración de la aplicación Flask
 app = Flask(__name__)
 
-# Obtener los datos totales una sola vez al iniciar la aplicación
+# Rutas de archivos y modelos
+MODEL_PATH = 'spam_classifier_model.joblib'
+VECTORIZER_PATH = 'tfidf_vectorizer.joblib'
+
+# --- Cargar el modelo y el vectorizador al iniciar la aplicación ---
+# Usamos un try-except para manejar errores si los archivos no existen
+# Esto es crucial para el despliegue en Render
 try:
-    TOTAL_DATA = get_total_data()
+    with open(MODEL_PATH, 'rb') as model_file:
+        model = pickle.load(model_file)
+    with open(VECTORIZER_PATH, 'rb') as vectorizer_file:
+        vectorizer = pickle.load(vectorizer_file)
+    print("Modelos cargados con éxito.")
 except Exception as e:
-    TOTAL_DATA = None 
+    print(f"Error al cargar modelos: {e}. El modelo no está disponible.")
+    model = None
+    vectorizer = None
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    results = None
-    error = None
-    sample_size = None
-    last_sample_size = None
+# --- Rutas de la API ---
 
-    if request.method == 'POST':
-        last_sample_size = request.form.get('sample_size', '')
-        try:
-            if last_sample_size:
-                sample_size = int(last_sample_size)
-            else:
-                sample_size = None
+@app.route('/')
+def home():
+    # La página principal ahora no necesita entrenar nada
+    return render_template('index.html')
 
-            # Validación dinámica
-            if sample_size is not None:
-                if sample_size <= 0:
-                    raise ValueError("Por favor, ingresa un número positivo mayor que cero.")
-                if TOTAL_DATA is not None and sample_size > TOTAL_DATA:
-                    raise ValueError(f"El tamaño de la muestra ({sample_size}) excede el límite de datos disponibles ({TOTAL_DATA}).")
+@app.route('/predict', methods=['POST'])
+def predict():
+    # Asegurarse de que los modelos se hayan cargado correctamente
+    if not model or not vectorizer:
+        return jsonify({'error': 'Modelo no disponible. Intente de nuevo más tarde.'}), 503
 
-            # Si pasa la validación, entrena el modelo
-            results = train_and_evaluate(sample_size=sample_size)
-        except (ValueError, TypeError) as e:
-            error = str(e) if str(e) else "Por favor, ingresa un número válido."
-        except Exception as e:
-            error = f"Error al entrenar el modelo: {e}"
-    else:
-        last_sample_size = ''
+    try:
+        data = request.get_json(force=True)
+        text = data['text']
 
-    return render_template('index.html', results=results, error=error, last_sample_size=last_sample_size, total_data=TOTAL_DATA)
+        text_transformed = vectorizer.transform([text])
+        prediction = model.predict(text_transformed)
+        is_spam = bool(prediction[0])
 
+        response = {
+            'text': text,
+            'is_spam': is_spam,
+            'prediction_label': 'spam' if is_spam else 'ham'
+        }
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+# Punto de entrada principal
 if __name__ == '__main__':
-    # Esta línea no se utiliza en Render, pero es útil para pruebas locales
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
