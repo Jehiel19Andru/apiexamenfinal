@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Entrenamiento del Modelo</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 40px; background-color: #f9f9f9; color: #333; }
+        .container { max-width: 1200px; margin: auto; }
+        h1, h2 { text-align: center; color: #2c3e50; }
+        .metrics { display: flex; justify-content: space-around; background-color: #ffffff; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .metric { text-align: center; }
+        .metric h3 { margin: 0; color: #34495e; }
+        .metric p { font-size: 2.5em; font-weight: bold; margin: 10px 0 0 0; color: #2980b9; }
+        .plots { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; justify-items: center; }
+        .plot-container { background-color: #ffffff; border: 1px solid #ddd; padding: 15px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        img { max-width: 100%; height: auto; border-radius: 8px; }
+        .training-section { background-color: #ffffff; padding: 30px; border-radius: 12px; margin-bottom: 40px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); text-align: center; }
+        input[type="number"] { padding: 10px; width: 200px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; margin-right: 10px; }
+        /* Nuevos estilos para el botón de limpiar */
+        .button-group { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+        .button-group button { background-color: #27ae60; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .button-group button:hover { background-color: #229954; }
+        .button-group .clear-button { background-color: #e74c3c; }
+        .button-group .clear-button:hover { background-color: #c0392b; }
+        
+        .error { color: #c0392b; background-color: #f9e3e3; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
+        .info { text-align: center; margin: 20px 0; font-size: 1.1em; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard de Evaluación de Spam</h1>
+
+        <div class="training-section">
+            <h2>Control de Entrenamiento</h2>
+            <form action="{{ url_for('index') }}" method="POST">
+                <label for="sample_size">Número de correos para entrenar:</label>
+                <input type="number" name="sample_size" id="sample_size" 
+                       placeholder="Ej: 10000" 
+                       value="{{ last_sample_size or '' }}">
+                <input type="hidden" name="last_sample_size" value="{{ last_sample_size or '' }}">
+                
+                <div class="button-group">
+                    <button type="submit">Entrenar y Evaluar</button>
+                    <button type="submit" formaction="{{ url_for('index') }}" formmethod="GET" class="clear-button">Limpiar</button>
+                </div>
+            </form>
+             {% if results %}
+                <p style="margin-top: 15px;">(Total de correos disponibles: {{ results.total_data }})</p>
+             {% endif %}
+        </div>
+        
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if results %}
+            <div class="info">
+                <h2>Resultados para un entrenamiento con <strong>{{ results.data_used }}</strong> correos</h2>
+            </div>
+            
+            <div class="metrics">
+                <div class="metric">
+                    <h3>Accuracy</h3>
+                    <p>{{ results.accuracy }}</p>
+                </div>
+                <div class="metric">
+                    <h3>F1-Score</h3>
+                    <p>{{ results.f1_score }}</p>
+                </div>
+            </div>
+
+            <div class="plots">
+                <div class="plot-container">
+                    <h3>Matriz de Confusión</h3>
+                    <img src="{{ url_for('static', filename=results.confusion_matrix_url.replace('static/', '')) }}?v={{ range(1, 99999) | random }}" alt="Matriz de Confusión">
+                </div>
+                <div class="plot-container">
+                    <h3>Curva ROC</h3>
+                    <img src="{{ url_for('static', filename=results.roc_curve_url.replace('static/', '')) }}?v={{ range(1, 99999) | random }}" alt="Curva ROC">
+                </div>
+                <div class="plot-container">
+                    <h3>Curva Precision-Recall</h3>
+                    <img src="{{ url_for('static', filename=results.pr_curve_url.replace('static/', '')) }}?v={{ range(1, 99999) | random }}" alt="Curva PR">
+                </div>
+            </div>
+        {% else %}
+             <p class="info">Ingresa un número y haz clic en "Entrenar y Evaluar" para ver los resultados.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
