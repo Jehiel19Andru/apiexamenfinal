@@ -2,7 +2,7 @@
 import pandas as pd
 import os
 import matplotlib
-matplotlib.use('Agg')  # Backend no interactivo para Flask
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -16,6 +16,16 @@ from sklearn.metrics import (
     RocCurveDisplay,
     PrecisionRecallDisplay
 )
+
+# ------------------------------------------------------------
+# Nueva función para obtener el total de datos
+# ------------------------------------------------------------
+def get_total_data():
+    index_file = "datasets.pkl"
+    if not os.path.exists(index_file):
+        raise FileNotFoundError(f"No se encontró '{index_file}'.")
+    df_full = pd.read_pickle(index_file)
+    return len(df_full)
 
 # ------------------------------------------------------------
 # Función para leer cada correo
@@ -33,7 +43,7 @@ def load_email(path):
 def train_and_evaluate(sample_size=None):
     index_file = "datasets.pkl"
     if not os.path.exists(index_file):
-        raise FileNotFoundError(f"No se encontró '{index_file}'. Ejecuta 'convert_dataset.py' primero.")
+        raise FileNotFoundError(f"No se encontró '{index_file}'.")
 
     # Cargar dataset
     df_full = pd.read_pickle(index_file).rename(columns={'ruta_completa': 'full_path'})
@@ -67,18 +77,15 @@ def train_and_evaluate(sample_size=None):
 
     # ------------------------------------------------------------
     # Preprocesamiento TF-IDF y modelo LogisticRegression
-    # Ajustado para una progresión de rendimiento más coherente
     # ------------------------------------------------------------
     text_preprocessor = ColumnTransformer(
         transformers=[("tfidf", TfidfVectorizer(
-            # AJUSTE 1: Limitar aún más el vocabulario para reducir el rendimiento inicial
             max_features=500,
             stop_words="english",
         ), "text")]
     )
 
     classifier = LogisticRegression(
-        # AJUSTE 2: Reducir C para forzar al modelo a ser más simple y sensible a la cantidad de datos
         C=0.05, 
         solver='lbfgs',
         max_iter=2000,
