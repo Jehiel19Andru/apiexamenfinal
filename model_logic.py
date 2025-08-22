@@ -16,6 +16,7 @@ from sklearn.metrics import (
     RocCurveDisplay,
     PrecisionRecallDisplay
 )
+import joblib
 
 # ------------------------------------------------------------
 # Función para obtener el total de datos
@@ -141,4 +142,6 @@ def train_and_evaluate(sample_size=None):
         "data_used": sample_size,
         "total_data": len(df_full)
     }
-    return results
+
+    # --- CAMBIO CLAVE: Devolvemos el modelo entrenado y los resultados ---
+    return model_pipeline, results
