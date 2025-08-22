@@ -1,9 +1,8 @@
 #!/bin/bash
 set -e
 
-# Pega aquí la NUEVA URL de tu archivo .pkl
-# ¡CAMBIO AQUÍ!
-DATASET_URL="https://github.com/TerrazasJr316/MailGuard-web/releases/download/v2.0-data/datasets.pkl"
+# Pegar la URL del archivo .pkl
+DATASET_URL="https://github.com/Jehiel19Andru/apiexamenfinal/releases/download/v3.0-midataset/datasets.pkl"
 
 # Revisa si el archivo de datos ya existe
 if [ ! -f "datasets.pkl" ]; then
@@ -14,5 +13,6 @@ else
     echo "Dataset preprocesado ya existe."
 fi
 
-echo "Iniciando la aplicación..."
-streamlit run app.py --server.port $PORT
+# Inicia la aplicación con Gunicorn
+echo "Iniciando la aplicación Flask con Gunicorn..."
+gunicorn --bind 0.0.0.0:$PORT app:app
